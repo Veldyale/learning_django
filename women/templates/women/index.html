@@ -1,0 +1,17 @@
+{% extends 'women/base.html' %}
+
+{% block title %}
+Главная страница
+{% endblock %}
+
+{% block content %}
+<ul>
+    {% for p in posts %}
+    <li>
+        <h3>{{p.pk}}.{{p.title}}</h3>
+        <p>{{p.content}}</p>
+        <hr>
+    </li>
+    {% endfor %}
+</ul>
+{% endblock %}
