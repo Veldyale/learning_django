@@ -1,0 +1,16 @@
+{% extends 'women/base.html' %}
+
+{% block content %}
+
+{{posts}}
+
+<ul class="list-articles">
+	{% for p in posts %}
+	{% if p.pk == 1 %}
+		{% autoescape on %}
+			{{p.content|linebreaks}}
+		{% endautoescape %}
+	{% endif %}
+	{% endfor %}
+</ul>
+{% endblock %}
