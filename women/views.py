@@ -11,11 +11,9 @@ menu = [{'title': 'О сайте', 'url_name': 'about'},
 
 def index(request):
     posts = Women.objects.all()
-    cats = Category.objects.all()
     context = {
                 'menu': menu,
                 'posts': posts,
-                'cats': cats,
                 'title': 'Главная страница',
                 'cat_selected': 0,
                 }
@@ -50,7 +48,6 @@ def show_post(request, post_id):
 
 def show_category(request, cat_id):
     posts = Women.objects.filter(cat_id=cat_id)
-    cats = Category.objects.all()
 
     if cat_id > 3:
         return HttpResponse('Категория не найдена')
@@ -58,7 +55,6 @@ def show_category(request, cat_id):
     context = {
                 'menu': menu,
                 'posts': posts,
-                'cats': cats,
                 'title': f'Категория {cat_id}',
                 'cat_selected': cat_id,
                 }
