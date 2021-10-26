@@ -43,7 +43,8 @@ def show_post(request, post_id):
     context = {
                 'menu': menu,
                 'posts': posts,
-                'title': 'Пост'
+                'title': 'Пост',
+                'post_selected': post_id,
                 }
     return render(request, 'women/post.html', context=context)
 

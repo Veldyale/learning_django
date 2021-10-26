@@ -2,11 +2,14 @@
 
 {% block content %}
 
-{{posts}}
 
 <ul class="list-articles">
 	{% for p in posts %}
-	{% if p.pk == 1 %}
+	{% if p.pk == post_selected %}
+		{% if p.photo %}
+			<p><img src="{{ p.photo.url }}" alt="" class="img-article-left thumb"></p>
+		{% endif %}
+
 		{% autoescape on %}
 			{{p.content|linebreaks}}
 		{% endautoescape %}
