@@ -1,5 +1,5 @@
 from django.http import HttpResponse, HttpResponseNotFound
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from .models import *
 
 menu = [{'title': 'О сайте', 'url_name': 'about'},
@@ -10,12 +10,13 @@ menu = [{'title': 'О сайте', 'url_name': 'about'},
 
 
 def index(request):
-    posts = Women.objects.all()
+    post = Women.objects.all()
+
     context = {
                 'menu': menu,
-                'posts': posts,
+                'post': post,
                 'title': 'Главная страница',
-                'cat_selected': 0,
+                'cat_selected': 'cat_slug',
                 }
     return render(request, 'women/index.html', context=context)
 
@@ -36,27 +37,28 @@ def contact(request):
 def login(request):
     return HttpResponse('Авторизация')
 
-def show_post(request, post_id):
-    posts = Women.objects.all()
+def show_post(request, post_slug):
+    post = get_object_or_404(Women, slug=post_slug)
+
     context = {
-                'menu': menu,
-                'posts': posts,
-                'title': 'Пост',
-                'post_selected': post_id,
-                }
+        'post': post,
+        'menu': menu,
+        'title': post.title,
+        'cat_selected': post.slug,
+    }
     return render(request, 'women/post.html', context=context)
 
-def show_category(request, cat_id):
-    posts = Women.objects.filter(cat_id=cat_id)
+def show_category(request, cat_slug):
+    post = Women.objects.filter(cat__slug=cat_slug)
 
-    if cat_id > 3:
-        return HttpResponse('Категория не найдена')
+    # if cat_slug > 3:
+    #     return HttpResponse('Категория не найдена')
 
     context = {
                 'menu': menu,
-                'posts': posts,
-                'title': f'Категория {cat_id}',
-                'cat_selected': cat_id,
+                'post': post,
+                'title': f'Категории',
+                'cat_selected': cat_slug,
                 }
     return render(request, 'women/index.html', context=context)
 

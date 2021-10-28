@@ -4,16 +4,13 @@
 
 
 <ul class="list-articles">
-	{% for p in posts %}
-	{% if p.pk == post_selected %}
-		{% if p.photo %}
-			<p><img src="{{ p.photo.url }}" alt="" class="img-article-left thumb"></p>
-		{% endif %}
+<h1>{{post.title}}</h1>
 
-		{% autoescape on %}
-			{{p.content|linebreaks}}
-		{% endautoescape %}
-	{% endif %}
-	{% endfor %}
+{% if post.photo %}
+	<p><img src="{{post.photo.url}}" alt="" class="img-article-left thumb"></p>
+{% endif %}
+
+{{post.content|linebreaks}}
+
 </ul>
 {% endblock %}
