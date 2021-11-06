@@ -1,42 +1,24 @@
-from django.http import HttpResponse, HttpResponseNotFound
+from django.http import HttpResponse, HttpResponseNotFound, Http404
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import *
-from .forms import AddPostForm
+from django.urls import reverse_lazy
 from django.views.generic import ListView, DeleteView, CreateView
 
+from .models import *
+from .forms import *
+from .utils import *
 
-menu = [{'title': 'О сайте', 'url_name': 'about'},
-        {'title': 'Добавить статью', 'url_name': 'add_page'},
-        {'title': 'Обратная связь', 'url_name': 'contact'},
-        {'title': 'Войти', 'url_name': 'login'}
-        ]
-
-
-class WomenIndex(ListView):
+class WomenIndex(DataMixin, ListView):
     model = Women
     template_name = 'women/index.html'  # Задаем маршрут к шаблону вместо стандартного
     context_object_name = 'post'  # Задаем имя списка вместо стандартного
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['menu'] = menu
-        context['title'] = 'Главная страница'
-        context['cat_selected'] = 0
+        c_def = self.get_user_context(title='Главная страница')
         return context
 
     def get_queryset(self):
         return Women.objects.filter(is_published=True)  # Выбираем что отображать из списка Women
-
-# def index(request):
-#     post = Women.objects.all()
-#
-#     context = {
-#                 'menu': menu,
-#                 'post': post,
-#                 'title': 'Главная страница',
-#                 'cat_selected': 0,
-#                 }
-#     return render(request, 'women/index.html', context=context)
 
 
 def about(request):
@@ -57,16 +39,6 @@ class AddPost(CreateView):
         return context
 
 
-# def addpage(request):
-#     if request.method == 'POST':
-#         form = AddPostForm(request.POST, request.FILES)
-#         if form.is_valid():
-#             form.save()
-#             return redirect('index')
-#     else:
-#         form = AddPostForm()
-#     return render(request, 'women/addpage.html', {'form': form, 'menu': menu, 'title': 'Добавление статьи'})
-
 def contact(request):
     return HttpResponse('Обратная связь')
 
@@ -86,19 +58,7 @@ class ShowPost(DeleteView):
         return context
 
 
-# def show_post(request, post_slug):
-#     post = get_object_or_404(Women, slug=post_slug)
-#
-#     context = {
-#         'post': post,
-#         'menu': menu,
-#         'title': post.title,
-#         'cat_selected': post.cat_id,
-#     }
-#
-#     return render(request, 'women/post.html', context=context)
-
-class WomenCategory(ListView):
+class WomenCategory(DataMixin, ListView):
     model = Women
     template_name = 'women/index.html'  # Задаем маршрут к шаблону вместо стандартного
     context_object_name = 'post'  # Задаем имя списка вместо стандартного
@@ -115,19 +75,5 @@ class WomenCategory(ListView):
     def get_queryset(self):
         return Women.objects.filter(cat__slug=self.kwargs['cat_slug'], is_published=True)  # Выбираем что отображать из списка Women
 
-# def show_category(request, cat_slug):
-#     post = Women.objects.filter(cat__slug=cat_slug)
-#
-#     # if cat_slug > 3:
-#     #     return HttpResponse('Категория не найдена')
-#
-#     context = {
-#                 'menu': menu,
-#                 'post': post,
-#                 'title': f'Категории',
-#                 'cat_selected': cat_slug,
-#                 }
-#     return render(request, 'women/index.html', context=context)
-#
 def pageNotFound(request, exception):
     return HttpResponseNotFound('<h1>Страница не найдена</h1>')
