@@ -1,3 +1,4 @@
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse, HttpResponseNotFound, Http404
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
@@ -15,7 +16,7 @@ class WomenIndex(DataMixin, ListView):
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
         c_def = self.get_user_context(title='Главная страница')
-        return context
+        return dict(list(context.items()) + list(c_def.items()))
 
     def get_queryset(self):
         return Women.objects.filter(is_published=True)  # Выбираем что отображать из списка Women
@@ -28,15 +29,17 @@ def about(request):
                 }
     return render(request, 'women/about.html', context=context)
 
-class AddPost(CreateView):
+class AddPost(LoginRequiredMixin, DataMixin, CreateView):
     form_class = AddPostForm
     template_name = 'women/addpage.html'
+    success_url = reverse_lazy('index')
+    login_url = reverse_lazy('index')  # Выбираем куда нас перенаправить миксин LoginRequiredMixin
+    raise_exception = True # Выбираем исключение для миксина LoginRequiredMixin
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['menu'] = menu
-        context['title'] = 'Добавление статьи'
-        return context
+        c_def = self.get_user_context(title="Добавление статьи")
+        return dict(list(context.items()) + list(c_def.items()))
 
 
 def contact(request):
@@ -45,7 +48,7 @@ def contact(request):
 def login(request):
     return HttpResponse('Авторизация')
 
-class ShowPost(DeleteView):
+class ShowPost(DataMixin, DeleteView):
     model = Women
     template_name = 'women/post.html'  # Задаем маршрут к шаблону вместо стандартного
     slug_url_kwarg = 'post_slug'
@@ -53,9 +56,8 @@ class ShowPost(DeleteView):
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['menu'] = menu
-        context['title'] = context['post']
-        return context
+        c_def = self.get_user_context(title=context['post'])
+        return dict(list(context.items()) + list(c_def.items()))
 
 
 class WomenCategory(DataMixin, ListView):
@@ -66,10 +68,8 @@ class WomenCategory(DataMixin, ListView):
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['menu'] = menu
-        context['title'] = 'Категория - ' + str(context['post'][0].cat)
-        context['cat_selected'] = context['post'][0].cat_id
-        return context
+        c_def = self.get_user_context(title="Категория - " + str(context['post'][0].cat), cat_selected=context['post'][0].cat_id)
+        return dict(list(context.items()) + list(c_def.items()))
 
 
     def get_queryset(self):
