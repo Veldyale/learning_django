@@ -1,4 +1,6 @@
+from django.contrib.auth import logout, login
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.views import LoginView
 from django.http import HttpResponse, HttpResponseNotFound, Http404
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
@@ -45,8 +47,8 @@ class AddPost(LoginRequiredMixin, DataMixin, CreateView):
 def contact(request):
     return HttpResponse('Обратная связь')
 
-def login(request):
-    return HttpResponse('Авторизация')
+# def login(request):
+#     return HttpResponse('Авторизация')
 
 class ShowPost(DataMixin, DeleteView):
     model = Women
@@ -88,3 +90,26 @@ class RegisterUser(DataMixin, CreateView):
         context = super().get_context_data(**kwargs)
         c_def = self.get_user_context(title='Регистрация')
         return dict(list(context.items()) + list(c_def.items()))
+
+    def form_valid(self, form):  # логинит при успешной регистрации
+        user = form.save()
+        login(self.request, user)  # специальная функция которая авторизовывает пользователя, импорт
+        return redirect('index')
+
+
+class LoginUser(DataMixin, LoginView):
+    form_class = LoginUserForm
+    template_name = 'women/login.html'
+
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        c_def = self.get_user_context(title="Авторизация")
+        return dict(list(context.items()) + list(c_def.items()))
+
+    def get_success_url(self):
+        return reverse_lazy('index')  # Можем заменить LOGIN_REDIRECT_URL ='/' в settings.py
+
+def logout_user(request):
+    logout(request)
+    return redirect('login')
