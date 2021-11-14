@@ -21,7 +21,7 @@ class WomenIndex(DataMixin, ListView):
         return dict(list(context.items()) + list(c_def.items()))
 
     def get_queryset(self):
-        return Women.objects.filter(is_published=True)  # Выбираем что отображать из списка Women
+        return Women.objects.filter(is_published=True).select_related('cat')  # Выбираем что отображать из списка Women (select_related('cat')-это оптимизация)
 
 
 def about(request):
@@ -70,12 +70,13 @@ class WomenCategory(DataMixin, ListView):
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
-        c_def = self.get_user_context(title="Категория - " + str(context['post'][0].cat), cat_selected=context['post'][0].cat_id)
+        c = Category.objects.get(slug=self.kwargs['cat_slug'])
+        c_def = self.get_user_context(title="Категория - " + str(c.name), cat_selected=c.pk)
         return dict(list(context.items()) + list(c_def.items()))
 
 
     def get_queryset(self):
-        return Women.objects.filter(cat__slug=self.kwargs['cat_slug'], is_published=True)  # Выбираем что отображать из списка Women
+        return Women.objects.filter(cat__slug=self.kwargs['cat_slug'], is_published=True).select_related('cat')  # Выбираем что отображать из списка Women
 
 def pageNotFound(request, exception):
     return HttpResponseNotFound('<h1>Страница не найдена</h1>')
